@@ -1,10 +1,12 @@
 package com.fintech.account.infrastructure.web;
 
+import com.fintech.account.application.command.CreateAccountCommand;
 import com.fintech.account.application.command.DepositCommand;
 import com.fintech.account.application.command.WithdrawCommand;
 import com.fintech.account.application.query.GetAccountQuery;
 import com.fintech.account.domain.model.Account;
 import com.fintech.account.domain.model.Money;
+import com.fintech.account.domain.ports.in.CreateAccountUseCase;
 import com.fintech.account.domain.ports.in.DepositUseCase;
 import com.fintech.account.domain.ports.in.GetAccountUseCase;
 import com.fintech.account.domain.ports.in.WithdrawUseCase;
@@ -21,13 +23,22 @@ public class AccountController {
     private final DepositUseCase depositUseCase;
     private final WithdrawUseCase withdrawUseCase;
     private final GetAccountUseCase getAccountUseCase;
+    private final CreateAccountUseCase createAccountUseCase;
 
     public AccountController(DepositUseCase depositUseCase,
                              WithdrawUseCase withdrawUseCase,
-                             GetAccountUseCase getAccountUseCase) {
+                             GetAccountUseCase getAccountUseCase,
+                             CreateAccountUseCase createAccountUseCase) {
         this.depositUseCase = depositUseCase;
         this.withdrawUseCase = withdrawUseCase;
         this.getAccountUseCase = getAccountUseCase;
+        this.createAccountUseCase = createAccountUseCase;
+    }
+
+    @PostMapping
+    public ResponseEntity<AccountResponse> createAccount(@Valid @RequestBody CreateAccountRequest request) {
+        Account account = createAccountUseCase.create(new CreateAccountCommand(request.holder()));
+        return ResponseEntity.status(201).body(AccountResponse.from(account));
     }
 
     @PostMapping("/{id}/deposit")

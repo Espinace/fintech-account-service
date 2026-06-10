@@ -1,17 +1,19 @@
 package com.fintech.account.domain.service;
 
+import com.fintech.account.application.command.CreateAccountCommand;
 import com.fintech.account.application.command.DepositCommand;
 import com.fintech.account.application.command.WithdrawCommand;
 import com.fintech.account.application.query.GetAccountQuery;
 import com.fintech.account.domain.event.MoneyDepositedEvent;
 import com.fintech.account.domain.model.Account;
+import com.fintech.account.domain.ports.in.CreateAccountUseCase;
 import com.fintech.account.domain.ports.in.DepositUseCase;
 import com.fintech.account.domain.ports.in.GetAccountUseCase;
 import com.fintech.account.domain.ports.in.WithdrawUseCase;
 import com.fintech.account.domain.ports.out.AccountRepository;
 import com.fintech.account.domain.ports.out.EventPublisher;
 
-public class AccountService implements DepositUseCase, WithdrawUseCase, GetAccountUseCase {
+public class AccountService implements DepositUseCase, WithdrawUseCase, GetAccountUseCase, CreateAccountUseCase {
 
     private final AccountRepository accountRepository;
     private final EventPublisher eventPublisher;
@@ -19,6 +21,13 @@ public class AccountService implements DepositUseCase, WithdrawUseCase, GetAccou
     public AccountService(AccountRepository accountRepository, EventPublisher eventPublisher) {
         this.accountRepository = accountRepository;
         this.eventPublisher = eventPublisher;
+    }
+
+    @Override
+    public Account create(CreateAccountCommand command) {
+        Account account = Account.open(command.holder());
+        accountRepository.save(account);
+        return account;
     }
 
     @Override
